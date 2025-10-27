@@ -1,37 +1,30 @@
-name: Daily Automated Commit
-
+name: Daily Commit Workflow
 on:
+  workflow_dispatch: # <-- This line allows you to run it manually (Step 7)
   schedule:
-    # Runs daily at 10:30 AM UTC (specific time as required)
-    - cron: '30 10 * * *'
-  workflow_dispatch: # Allows manual triggering for testing
+    # This cron is set to run ~2 minutes from now (UTC)
+    - cron: '36 14 * * *'
+
+# ADDED: This gives the workflow write permissions for the commit
+permissions:
+  contents: write
 
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        # ADDED: Explicitly checkout the main branch
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Configure Git with email 23f3003784@ds.study.iitm.ac.in
+          ref: main 
+
+      - name: Create Empty Commit
         run: |
-          git config --local user.email "23f3003784@ds.study.iitm.ac.in"
-          git config --local user.name "DevSync Bot"
-          
-      - name: Create daily update file
-        run: |
-          echo "Last updated: $(date)" >> daily-updates.log
-          echo "Automated commit for activity tracking" >> daily-updates.log
-          echo "---" >> daily-updates.log
-          
-      - name: Commit changes
-        run: |
-          git add daily-updates.log
-          git commit -m "chore: automated daily update - $(date +'%Y-%m-%d %H:%M:%S')"
-          
-      - name: Push changes
-        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions-bot@github.com"
+          git commit --allow-empty -m "Daily empty commit"
           git push
+
+      - name: Validation Step for 23f3003784@ds.study.iitm.ac.in
+        run: echo "This step validates the workflow for the user."
